@@ -13,6 +13,7 @@ namespace MVC5Course
     {
         protected void Application_Start()
         {
+            //jason Test
             AreaRegistration.RegisterAllAreas();
             GlobalConfiguration.Configure(WebApiConfig.Register);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
