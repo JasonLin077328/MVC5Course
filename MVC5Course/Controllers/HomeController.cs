@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MVC5Course.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -25,6 +26,26 @@ namespace MVC5Course.Controllers
             ViewBag.Message = "Your contact page.";
 
             return View();
+        }
+
+        public ActionResult Test()
+        {
+            return View();
+        }
+
+        public ActionResult Login()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult Login(LoginVM oLoginVM)
+        {
+            if (ModelState.IsValid)
+            {
+                return Content(oLoginVM.UserName + ";" + oLoginVM.Password);
+            }
+            return Content("登入失敗");
         }
     }
 }
