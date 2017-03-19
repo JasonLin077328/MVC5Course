@@ -9,53 +9,63 @@
 <p>
     @Html.ActionLink("Create New", "Create")
 </p>
-    @using (Html.BeginForm())
+    @using (Html.BeginForm("index", "Products", FormMethod.Get))
     {
         @Html.TextBox("Keyword");
         <input type="submit" value="查詢" />
     }
-@using PagedList;
-@using PagedList.Mvc
 
-@Html.PagedListPager(Model as IPagedList , (PageNo) => Url.Action("Index",new { PageNo = PageNo, Keyword = ViewBag.Keyword }))
+@Html.Partial("_PagedList", Model)
+@using (Html.BeginForm())
+{
 
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model1 => model1.ProductName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Price)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Active)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Stock)
-        </th>
-        <th></th>
-    </tr>
+    <table class="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model1 => model1.ProductName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Active)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Stock)
+            </th>
+            <th></th>
+        </tr>
+        @{
+            var Products = Model.ToArray();
+        }
+        @for (int i = 0; i < Products.Length; i++)
+        {
+            @Html.HiddenFor(modelItem => Products[i].ProductId)
+            <tr>
+                <td>
+                    @Html.EditorFor(modelItem => Products[i].ProductName)
+                    @Html.ValidationMessageFor(modelItem => Products[i].ProductName)
+                </td>
+                <td style="@(Products[i].Price > 100 ? "color:#ff0000":"")">
+                    @Html.EditorFor(modelItem => Products[i].Price)
+                    @Html.ValidationMessageFor(modelItem => Products[i].Price)
+                </td>
+                <td>
+                    @Html.EditorFor(modelItem => Products[i].Active)
+                    @Html.ValidationMessageFor(modelItem => Products[i].Price)
+                </td>
+                <td>
+                    @Html.EditorFor(modelItem => Products[i].Stock)
+                    @Html.ValidationMessageFor(modelItem => Products[i].Price)
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { id = Products[i].ProductId }) |
+                    @Html.ActionLink("Details", "Details", new { id = Products[i].ProductId }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = Products[i].ProductId }) |
+                </td>
+            </tr>
+        }
+    </table>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.ProductName)
-        </td>
-        <td style="@(item.Price > 100 ? "color:#ff0000":"")">
-            @Html.DisplayFor(modelItem => item.Price)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Active)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Stock)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.ProductId  }) |
-            @Html.ActionLink("Details", "Details", new { id=item.ProductId }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.ProductId }) |            
-        </td>
-    </tr>
+    <input type="submit" value="送出" />
 }
-
-</table>

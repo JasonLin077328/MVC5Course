@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Security;
 
 namespace MVC5Course.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         public ActionResult Index()
         {
@@ -32,20 +33,30 @@ namespace MVC5Course.Controllers
         {
             return View();
         }
-
+        [AllowAnonymous]
         public ActionResult Login()
         {
             return View();
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public ActionResult Login(LoginVM oLoginVM)
         {
             if (ModelState.IsValid)
             {
-                return Content(oLoginVM.UserName + ";" + oLoginVM.Password);
+                TempData["LoginVM"] = oLoginVM;
+                FormsAuthentication.RedirectFromLoginPage(oLoginVM.UserName,false);
+                return Redirect("/Products/");
             }
             return Content("登入失敗");
+        }
+
+
+        public ActionResult Logout()
+        {
+            FormsAuthentication.SignOut();
+            return Redirect("/Home/Login");
         }
     }
 }

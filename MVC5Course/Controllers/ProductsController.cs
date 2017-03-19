@@ -11,13 +11,20 @@ using PagedList;
 
 namespace MVC5Course.Controllers
 {
-    public class ProductsController : Controller
+   
+    
+    public class ProductsController : BaseController
     {
         //private FabricsEntities db = new FabricsEntities();
         ProductRepository oProductRepository = RepositoryHelper.GetProductRepository();
 
         // GET: Products
         public ActionResult Index(string Keyword ,int PageNo =1)
+        {
+            return View(DoSearch(Keyword, PageNo));
+        }
+
+        private IPagedList<Product> DoSearch(string Keyword, int PageNo = 1)
         {
             var datas = oProductRepository.All();
             if (!string.IsNullOrEmpty(Keyword))
@@ -26,7 +33,31 @@ namespace MVC5Course.Controllers
             }
             datas = datas.OrderByDescending(o => o.ProductId);
             ViewBag.Keyword = Keyword;
-            return View(datas.ToPagedList(PageNo,10));
+            return datas.ToPagedList(PageNo, 3);
+        }
+
+        [HttpPost]
+        public ActionResult Index(IList<Product> Products, string Keyword, int PageNo = 1)
+        {
+            if (ModelState.IsValid)
+            {
+
+                foreach (var oProduct in Products)
+                {
+                    var OldData = oProductRepository.Find(oProduct.ProductId);
+                    OldData.ProductName = oProduct.ProductName;
+                    OldData.Price = oProduct.Price;
+                    OldData.Active = oProduct.Active;
+                    OldData.Stock = oProduct.Stock;
+                }
+                oProductRepository.UnitOfWork.Commit();
+                return RedirectToAction("index");
+            }else
+            {
+                return View(DoSearch(Keyword, PageNo));
+            }
+
+         
         }
 
         // GET: Products/Details/5
@@ -42,6 +73,18 @@ namespace MVC5Course.Controllers
                 return HttpNotFound();
             }
             return View(product);
+        }
+
+        // GET: Products/Details/5
+        public ActionResult ProductOrderLine(int? id)
+        {
+     
+            Product product = oProductRepository.Find(id);
+            if (product == null)
+            {
+                return HttpNotFound();
+            }
+            return View(product.OrderLine);
         }
 
         // GET: Products/Create
@@ -87,16 +130,15 @@ namespace MVC5Course.Controllers
         // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ProductId,ProductName,Price,Active,Stock")] Product product)
+        public ActionResult Edit(int? id , FormCollection form)
         {
-            if (ModelState.IsValid)
+            var prod = oProductRepository.Find(id);
+            if (this.TryUpdateModel<Product>(prod,new string[] { "ProductName","Stock"}))
             {
-
-                oProductRepository.UnitOfWork.Context.Entry(product).State = EntityState.Modified;
                 oProductRepository.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
-            return View(product);
+            return View(prod);
         }
 
         // GET: Products/Delete/5
