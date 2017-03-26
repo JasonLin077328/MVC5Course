@@ -19,17 +19,24 @@ namespace MVC5Course.Controllers
         ProductRepository oProductRepository = RepositoryHelper.GetProductRepository();
 
         // GET: Products
-        public ActionResult Index(string Keyword ,int PageNo =1)
+        public ActionResult Index(string Keyword,string SearchActive, int PageNo = 1)
         {
-            return View(DoSearch(Keyword, PageNo));
+            var SelectItem = oProductRepository.All().Select(o => (o.Active ?? false).ToString()).Distinct().ToList();
+            ViewBag.SearchActive = new SelectList(SelectItem);
+            return View(DoSearch(Keyword, SearchActive, PageNo));
         }
 
-        private IPagedList<Product> DoSearch(string Keyword, int PageNo = 1)
+        private IPagedList<Product> DoSearch(string Keyword, string SearchActive, int PageNo = 1)
         {
             var datas = oProductRepository.All();
             if (!string.IsNullOrEmpty(Keyword))
             {
                 datas = datas.Where(o => o.ProductName.Contains(Keyword));
+            }
+            if (!string.IsNullOrEmpty(SearchActive))
+            {
+                bool Active = bool.Parse(SearchActive.ToLower());
+                datas = datas.Where(o => o.Active == Active);
             }
             datas = datas.OrderByDescending(o => o.ProductId);
             ViewBag.Keyword = Keyword;
@@ -37,7 +44,7 @@ namespace MVC5Course.Controllers
         }
 
         [HttpPost]
-        public ActionResult Index(IList<Product> Products, string Keyword, int PageNo = 1)
+        public ActionResult Index(IList<Product> Products, string Keyword, string SearchActive, int PageNo = 1)
         {
             if (ModelState.IsValid)
             {
@@ -54,7 +61,7 @@ namespace MVC5Course.Controllers
                 return RedirectToAction("index");
             }else
             {
-                return View(DoSearch(Keyword, PageNo));
+                return View(DoSearch(Keyword, SearchActive, PageNo));
             }
 
          
@@ -133,7 +140,7 @@ namespace MVC5Course.Controllers
         public ActionResult Edit(int? id , FormCollection form)
         {
             var prod = oProductRepository.Find(id);
-            if (this.TryUpdateModel<Product>(prod,new string[] { "ProductName","Stock"}))
+            if (this.TryUpdateModel<Product>(prod,new string[] { "ProductName","Stock","Active"}))
             {
                 oProductRepository.UnitOfWork.Commit();
                 return RedirectToAction("Index");

@@ -11,6 +11,7 @@
 </p>
     @using (Html.BeginForm("index", "Products", FormMethod.Get))
     {
+        @Html.DropDownList("SearchActive",null,"Select Active",new { onchange=""})
         @Html.TextBox("Keyword");
         <input type="submit" value="查詢" />
     }
